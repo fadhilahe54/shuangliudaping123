@@ -1,0 +1,206 @@
+/**
+ * index.css — 全局基础样式
+ *
+ * 职责：
+ *   1. 引入 Tailwind CSS 工具类
+ *   2. 定义全局字体变量（使用系统字体栈，避免国内 Google Fonts 超时）
+ *   3. 重置 body 样式（深色背景 + 全屏无滚动）
+ *   4. 根据设备性能档位（quality-low/medium/high）关闭高开销 CSS 效果
+ *   5. 定制 Element Plus 消息提示、确认弹框样式（统一扁平风格）
+ */
+
+/* 引入 Tailwind CSS v4（无需配置文件，直接 @import） */
+@import "tailwindcss";
+
+/* ===== 全局字体变量 ===== */
+/* 使用系统字体栈代替 Google Fonts，确保中文环境下的渲染质量与加载速度 */
+@theme {
+  /* 无衬线字体：优先使用系统 UI 字体，兼顾中文显示 */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+  /* 等宽字体：用于代码块、终端输出等场景 */
+  --font-mono: ui-monospace, SFMono-Regular, "Cascadia Mono", Consolas, "Courier New", monospace;
+}
+
+/* ===== 全局 body 重置 ===== */
+/* 大屏应用固定全屏显示，禁用系统滚动条，内容区滚动由各面板自行管理 */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #020617; /* 深蓝黑背景，与 Three.js 场景融合 */
+  color: #f8fafc;             /* 全局默认文字颜色：近白色 */
+  overflow: hidden;           /* 禁止页面滚动，确保大屏全屏沉浸体验 */
+}
+
+/* ===========================================================================
+ * 老 GPU / 老 Chrome（< 140）性能降级
+ * 启动时由 main.js 给 <html> 打 .quality-low / .quality-medium / .quality-high
+ *
+ * 痛点：backdrop-filter:blur / filter:blur 在老 Chrome（早期版本）大量场景下
+ * 走 CPU 软件实现，4K 大屏 + 多面板叠加时单帧能耗几十毫秒，是动画卡顿的主要元凶。
+ *
+ * 策略：
+ *   - low  档：禁用 backdrop-filter（性能毒药），关闭装饰 keyframe 动画，
+ *             并对依赖大半径 blur 的伪元素 / 装饰层（带 -glow / -pulse 后缀）整体 display:none，
+ *             保留普通 filter:blur 以避免暴露 ::after 装饰副本的原始文本/形状
+ *   - medium 档：仅关闭明确标记的 blur 脉冲动画
+ *   - high 档：保持原效果
+ * =========================================================================== */
+
+/* 低档：仅关闭真正的性能毒药 backdrop-filter（大屏全屏 GPU 卷积，老 Chrome 多走 CPU 软实现） */
+/* 注意：不全局禁用 filter:blur，因为很多 ::after/伪元素以"模糊副本"方式做光晕装饰，强行清零会暴露原始文本/形状反而更糟 */
+.quality-low *,
+.quality-low *::before,
+.quality-low *::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 低档：关闭装饰用 keyframe 动画（脉冲呼吸等），减少合成层重绘
+ * keyframe 内若设置了 filter: blur(N) 会保留启动帧的 blur 值，标题等装饰仍正常
+ * 关键：用 :not() 显式排除 .loading-screen 自身及其所有后代
+ * → 加载页内的火车动画、光环、粒子、扫描等动画完整保留 */
+.quality-low *:not(.loading-screen):not(.loading-screen *),
+.quality-low *:not(.loading-screen):not(.loading-screen *)::before,
+.quality-low *:not(.loading-screen):not(.loading-screen *)::after {
+  animation: none !important;
+}
+
+/* 低档：将依赖大半径 blur 的装饰元素整体隐藏（按 class 命名约定匹配）
+ * 同样排除加载页内的装饰元素 */
+.quality-low :is(.title-glow-back, .logo-corner-glow, .btn-glow,
+  [class$="-glow"], [class*="-pulse"]):not(.loading-screen):not(.loading-screen *) {
+  display: none !important;
+}
+.quality-low .title-content::after {
+  display: none !important;
+}
+
+/* 中档：保留观感，但去掉装饰性 blur 脉冲动画（不依赖具体 class，留待后续按需加） */
+.quality-medium .blur-pulse,
+.quality-medium [class*="blur-pulse"] {
+  animation: none !important;
+}
+
+/* ===== Element Plus 消息提示扁平化样式 ===== */
+.el-message {
+  border-radius: 12px !important;
+  border: none !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+  padding: 16px 20px !important;
+  background: #ffffff !important;
+}
+
+.el-message__icon {
+  font-size: 20px !important;
+}
+
+.el-message__content {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #1e293b !important;
+}
+
+/* 成功消息 */
+.el-message--success {
+  background: linear-gradient(135deg, #f0fdf4, #ffffff) !important;
+  border-left: 4px solid #22c55e !important;
+}
+
+.el-message--success .el-message__icon {
+  color: #22c55e !important;
+}
+
+/* 警告消息 */
+.el-message--warning {
+  background: linear-gradient(135deg, #fffbeb, #ffffff) !important;
+  border-left: 4px solid #f59e0b !important;
+}
+
+.el-message--warning .el-message__icon {
+  color: #f59e0b !important;
+}
+
+/* 错误消息 */
+.el-message--error {
+  background: linear-gradient(135deg, #fef2f2, #ffffff) !important;
+  border-left: 4px solid #ef4444 !important;
+}
+
+.el-message--error .el-message__icon {
+  color: #ef4444 !important;
+}
+
+/* 信息消息 */
+.el-message--info {
+  background: linear-gradient(135deg, #f0f9ff, #ffffff) !important;
+  border-left: 4px solid #3b82f6 !important;
+}
+
+.el-message--info .el-message__icon {
+  color: #3b82f6 !important;
+}
+
+/* ===== Element Plus 消息框关闭按钮 ===== */
+.el-message__closeBtn {
+  color: #94a3b8 !important;
+  font-size: 16px !important;
+}
+
+.el-message__closeBtn:hover {
+  color: #64748b !important;
+}
+
+/* ===== Element Plus 确认对话框扁平化样式 ===== */
+.el-message-box {
+  border-radius: 16px !important;
+  border: none !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+  overflow: hidden !important;
+}
+
+.el-message-box__header {
+  padding: 24px 24px 0 !important;
+}
+
+.el-message-box__title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+}
+
+.el-message-box__content {
+  padding: 16px 24px !important;
+  font-size: 14px !important;
+  color: #475569 !important;
+}
+
+.el-message-box__btns {
+  padding: 16px 24px 24px !important;
+}
+
+.el-message-box__btns .el-button {
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  padding: 10px 24px !important;
+}
+
+.el-message-box__btns .el-button--primary {
+  background: linear-gradient(135deg, #3b81f4, #3b82f6) !important;
+  border: none !important;
+}
+
+.el-message-box__btns .el-button--primary:hover {
+  background: linear-gradient(135deg, #245fe2, #2563eb) !important;
+  box-shadow: 0 4px 16px rgba(34, 211, 238, 0.3) !important;
+}
+
+.el-message-box__btns .el-button--default {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #475569 !important;
+}
+
+.el-message-box__btns .el-button--default:hover {
+  background: #e2e8f0 !important;
+  border-color: #cbd5e1 !important;
+}
