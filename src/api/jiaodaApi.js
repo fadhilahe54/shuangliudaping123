@@ -89,4 +89,51 @@ export const jdQueryTopWorkByBid = (bid) =>
     params: { bid },
   })
 
+/**
+ * 分页查询「班组作业卡」（全量作业卡列表，含卡号、归属部门、状态等）
+ * @param {number} [state=0] 作业卡状态（0=空闲）
+ * @returns {Promise<Array<Object>>}
+ */
+export const jdQueryRegisterWorkCards = (state = 0) =>
+  jdApi.post('/work_register_api/register_work_card/page_query', {
+    pageCode: 1,
+    pageSize: 1000,
+    param: { state },
+  })
+
+/**
+ * 分页查询「登顶作业卡」（全量登顶卡列表，含卡号、股道、列位等）
+ * @returns {Promise<Array<Object>>}
+ */
+export const jdQueryTopWorkCards = () =>
+  jdApi.post('/work_register_api/top_work_card/page_query', {
+    pageCode: 1,
+    pageSize: 1000,
+  })
+
+/**
+ * 分页查询用户列表（含班组归属、头像、工作单元等）
+ * @param {Object} [param] 查询参数
+ * @param {number} [param.isDelete=0] 是否删除（0=未删除）
+ * @param {boolean} [param.withGroup=true] 是否包含班组信息
+ * @param {boolean} [param.withFunction=true] 是否包含功能权限
+ * @returns {Promise<Array<Object>>}
+ */
+export const jdQueryUsers = (param = { isDelete: 0, withGroup: true, withFunction: true }) =>
+  jdApi.post('/d2_repair_api/user/page_query', {
+    pageCode: 1,
+    pageSize: 999,
+    param,
+  })
+
+/**
+ * 分页查询部门/班组列表
+ * @returns {Promise<Array<Object>>}
+ */
+export const jdQueryGroups = () =>
+  jdApi.post('/d2_repair_api/group/page_query', {
+    pageCode: 1,
+    pageSize: 1000,
+  })
+
 export default jdApi

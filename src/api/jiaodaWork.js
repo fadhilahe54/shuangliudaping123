@@ -36,6 +36,10 @@ import {
   jdQueryParks,
   jdQueryRegisterWorkByBid,
   jdQueryTopWorkByBid,
+  jdQueryRegisterWorkCards,
+  jdQueryTopWorkCards,
+  jdQueryUsers,
+  jdQueryGroups,
 } from './jiaodaApi.js'
 
 /** trackIndex → 列位 key（1=一位, 2=二位） */
@@ -121,4 +125,37 @@ export async function fetchWorkByTrackName() {
   })
 
   return map
+}
+
+/**
+ * 拉取班组作业卡和登顶作业卡的汇总统计
+ * @returns {Promise<{registerCards:Array, topCards:Array, registerTotal:number, topTotal:number}>}
+ */
+export async function fetchWorkCardsSummary() {
+  const [regRes, topRes] = await Promise.allSettled([
+    jdQueryRegisterWorkCards(0),
+    jdQueryTopWorkCards(),
+  ])
+  const registerCards = regRes.status === 'fulfilled' && Array.isArray(regRes.value) ? regRes.value : []
+  const topCards = topRes.status === 'fulfilled' && Array.isArray(topRes.value) ? topRes.value : []
+  return {
+    registerCards,
+    topCards,
+    registerTotal: registerCards.length,
+    topTotal: topCards.length,
+  }
+}
+
+/**
+ * 拉取交大机电系统的人员和部门数据
+ * @returns {Promise<{users:Array, groups:Array}>}
+ */
+export async function fetchJdUsersAndGroups() {
+  const [uRes, gRes] = await Promise.allSettled([
+    jdQueryUsers(),
+    jdQueryGroups(),
+  ])
+  const users = uRes.status === 'fulfilled' && Array.isArray(uRes.value) ? uRes.value : []
+  const groups = gRes.status === 'fulfilled' && Array.isArray(gRes.value) ? gRes.value : []
+  return { users, groups }
 }
