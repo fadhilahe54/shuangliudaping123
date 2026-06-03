@@ -492,17 +492,25 @@ export function createTrack(id, positionX, carriagesData, trainType, trackName, 
 
   // 轨道ID标号（Sprite 始终面向相机，任意视角可见）
   const trackColor = isEMU ? '#00e676' : '#0ea5e9'
+  const trackBorderColor = isEMU ? 'rgba(0,230,118,0.6)' : 'rgba(14,165,233,0.6)'
+  const trackShadowColor = isEMU ? 'rgba(0,230,118,0.5)' : 'rgba(14,165,233,0.5)'
   // 远端股道标号（位置随股道长度调整）
   const groundTextFar = createTextSprite(`${displayName}\n一位`, {
     fontSize: 72,
     fontWeight: '700',
     color: trackColor,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    borderRadius: 10,
-    paddingX: 20,
-    paddingY: 10,
+    backgroundColor: 'rgba(2,6,23,0.72)',
+    borderColor: trackBorderColor,
+    borderWidth: 2,
+    borderRadius: 14,
+    paddingX: 26,
+    paddingY: 14,
     worldHeight: 3.8,
     depthTest: true,
+    outlineColor: 'rgba(0,0,0,0.8)',
+    outlineWidth: 4,
+    shadowColor: trackShadowColor,
+    shadowBlur: 12,
   })
   groundTextFar.position.set(0, 5.0, layout.farLabelZ)
   trackGroup.add(groundTextFar)
@@ -522,12 +530,18 @@ export function createTrack(id, positionX, carriagesData, trainType, trackName, 
     fontSize: 72,
     fontWeight: '700',
     color: trackColor,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    borderRadius: 10,
-    paddingX: 20,
-    paddingY: 10,
+    backgroundColor: 'rgba(2,6,23,0.72)',
+    borderColor: trackBorderColor,
+    borderWidth: 2,
+    borderRadius: 14,
+    paddingX: 26,
+    paddingY: 14,
     worldHeight: 3.8,
     depthTest: false,
+    outlineColor: 'rgba(0,0,0,0.8)',
+    outlineWidth: 4,
+    shadowColor: trackShadowColor,
+    shadowBlur: 12,
   })
   groundTextNear.renderOrder = 90 // 确保在普通物体上方，但在状态标牌下方
   groundTextNear.position.set(0, 5.0, layout.nearLabelZ-2)
@@ -899,12 +913,18 @@ export function createSidingTrack(nId, displayIndex, positionX, carriagesData, t
     fontSize: 64,
     fontWeight: '700',
     color: '#f59e0b',
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    borderRadius: 10,
-    paddingX: 18,
-    paddingY: 8,
+    backgroundColor: 'rgba(2,6,23,0.72)',
+    borderColor: 'rgba(245,158,11,0.55)',
+    borderWidth: 2,
+    borderRadius: 12,
+    paddingX: 22,
+    paddingY: 10,
     worldHeight: 3.2,
     depthTest: true,
+    outlineColor: 'rgba(0,0,0,0.8)',
+    outlineWidth: 3,
+    shadowColor: 'rgba(245,158,11,0.45)',
+    shadowBlur: 10,
   })
   groundTextFar.position.set(0, 5.0, layout.farLabelZ)
   trackGroup.add(groundTextFar)
@@ -924,12 +944,18 @@ export function createSidingTrack(nId, displayIndex, positionX, carriagesData, t
     fontSize: 64,
     fontWeight: '700',
     color: '#f59e0b',
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    borderRadius: 10,
-    paddingX: 18,
-    paddingY: 8,
+    backgroundColor: 'rgba(2,6,23,0.72)',
+    borderColor: 'rgba(245,158,11,0.55)',
+    borderWidth: 2,
+    borderRadius: 12,
+    paddingX: 22,
+    paddingY: 10,
     worldHeight: 3.2,
     depthTest: false,
+    outlineColor: 'rgba(0,0,0,0.8)',
+    outlineWidth: 3,
+    shadowColor: 'rgba(245,158,11,0.45)',
+    shadowBlur: 10,
   })
   groundTextNear.renderOrder = 90 // 确保在普通物体上方，但在状态标牌下方
   groundTextNear.position.set(0, 5.0, layout.nearLabelZ-2)
