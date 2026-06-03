@@ -34,7 +34,7 @@ import {
   getGroupVehiclesUnified,
 } from '../api/dispatchApi.js'
 // 交大机电「股道作业」数据聚合（班组作业 / 登顶作业），按股道名称索引
-import { fetchWorkByTrackName, emptyWorkAggregate } from '../api/jiaodaWork.js'
+import { fetchWorkByTrackName, emptyWorkAggregate, fetchAllStockRoadInfoFromJd } from '../api/jiaodaWork.js'
 
 /**
  * 根据车辆信息DTO生成车厢类型标识
@@ -324,7 +324,15 @@ export const useTrainStore = defineStore('train', () => {
     }
     dataLoading.value = true
     try {
-      const data = await getAllStockRoadInfo()
+      // 优先从交大机电接口获取股道数据（后端停止时的主数据源）
+      // 失败时回退到后台接口
+      let data
+      try {
+        data = await fetchAllStockRoadInfoFromJd()
+      } catch (jdErr) {
+        console.warn('[Store] 交大机电接口获取失败，回退到后台接口', jdErr)
+        data = await getAllStockRoadInfo()
+      }
       if (!data || !Array.isArray(data) || data.length === 0) {
         console.warn('后台股道数据为空，使用默认配置')
         dataLoaded.value = true
@@ -372,7 +380,8 @@ export const useTrainStore = defineStore('train', () => {
         return {
           id: idx,                        // 前端轨道索引（0开始）
           dbId: track.id,                 // 后台数据库ID
-          name: track.股道名称,            // 股道名称（如“1道”、“7道”）
+          name: track.股道名称,            // 股道名称（如“DC1”、“DJ1”）
+          placeCount: track.placeCount ?? 2, // 列位数（1=仅一位, 2=一位+二位）
           trackLength: track.股道长度 ?? null,  // 股道长度（后台配置）
           trackOffset: track.股道偏移量 ?? null, // 股道偏移量/起始位置（后台配置）
           trainType: firstGroup ? mapTrainType(firstGroup.车型) : TRAIN_TYPE_CONV,
@@ -411,6 +420,7 @@ export const useTrainStore = defineStore('train', () => {
           id: `n${idx + 1}`,              // 前端存车道ID
           dbId: track.id,
           name: track.股道名称,
+          placeCount: track.placeCount ?? 2, // 列位数
           displayIndex: idx + 1,
           trackLength: track.股道长度 ?? null,  // 股道长度（后台配置）
           trackOffset: track.股道偏移量 ?? null, // 股道偏移量/起始位置（后台配置）

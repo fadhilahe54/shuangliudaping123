@@ -21,6 +21,8 @@ import CarriageDetails from '../components/CarriageDetails.vue'
 import WorkInfoPanel from '../components/WorkInfoPanel.vue'
 // 股道作业标牌详情（点击有车组列位的班组/登顶统计标牌时从右侧弹出）
 import WorkSignDetailPanel from '../components/WorkSignDetailPanel.vue'
+// 交大机电作业监控看板（展示实时作业卡、人员、股道作业概况）
+import JiaodaWorkDashboard from '../components/JiaodaWorkDashboard.vue'
 // 全局 Toast 通知组件
 import { Toaster } from 'vue-sonner'
 // 科技感加载页面（3D 场景就绪前覆盖全屏展示）
@@ -47,6 +49,10 @@ const loadingStatus = computed(() => threeCanvasRef.value?.loadingStatus ?? '正
     <CarriageDetails />
     <WorkInfoPanel />
     <WorkSignDetailPanel />
+    <!-- 右下角：交大机电作业监控看板 -->
+    <div class="jd-work-dashboard-slot">
+      <JiaodaWorkDashboard />
+    </div>
     <!-- 全局 Toast 通知（顶部居中，深色主题） -->
     <Toaster position="top-center" theme="dark" />
 
@@ -71,5 +77,15 @@ const loadingStatus = computed(() => threeCanvasRef.value?.loadingStatus ?? '正
 .loading-fade-leave-to {
   opacity: 0;
   filter: blur(8px);
+}
+
+/* 右下角作业监控看板定位 */
+.jd-work-dashboard-slot {
+  position: fixed;
+  right: clamp(8px, 1vw, 16px);
+  bottom: clamp(8px, 1.5vh, 16px);
+  width: clamp(280px, 22vw, 380px);
+  z-index: 2;
+  pointer-events: auto;
 }
 </style>

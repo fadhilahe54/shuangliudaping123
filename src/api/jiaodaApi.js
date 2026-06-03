@@ -14,11 +14,10 @@ import axios from 'axios'
 
 /* ============================================================
  * 基址配置
- *   TODO: 部署/联调时改成交大机电系统真实地址，例如：
- *         http://10.201.193.45:8081
- *   文档里的 http://127.0.0.1:4523/m1/... 是 apifox mock，仅供本地演示。
+ *   当前已对接交大机电真实系统（172.17.254.100:4523）。
+ *   如需切换环境，可通过 window.__JD_MECH_BASE_URL__ 覆盖。
  * ============================================================ */
-const DEFAULT_JD_MECH_BASE_URL = 'http://127.0.0.1:4523/m1/8360761-8126275-7873109'
+const DEFAULT_JD_MECH_BASE_URL = 'http://172.17.254.100:4523/m1/8360761-8126275-7873109'
 
 /** 运行时基址：优先取全局变量覆盖，其次取默认值 */
 export const JD_MECH_BASE_URL =
@@ -87,6 +86,53 @@ export const jdQueryRegisterWorkByBid = (bid) =>
 export const jdQueryTopWorkByBid = (bid) =>
   jdApi.get('/work_register_api/top_work_record/query_by_bid', {
     params: { bid },
+  })
+
+/**
+ * 分页查询「班组作业卡」（全量作业卡列表，含卡号、归属部门、状态等）
+ * @param {number} [state=0] 作业卡状态（0=空闲）
+ * @returns {Promise<Array<Object>>}
+ */
+export const jdQueryRegisterWorkCards = (state = 0) =>
+  jdApi.post('/work_register_api/register_work_card/page_query', {
+    pageCode: 1,
+    pageSize: 1000,
+    param: { state },
+  })
+
+/**
+ * 分页查询「登顶作业卡」（全量登顶卡列表，含卡号、股道、列位等）
+ * @returns {Promise<Array<Object>>}
+ */
+export const jdQueryTopWorkCards = () =>
+  jdApi.post('/work_register_api/top_work_card/page_query', {
+    pageCode: 1,
+    pageSize: 1000,
+  })
+
+/**
+ * 分页查询用户列表（含班组归属、头像、工作单元等）
+ * @param {Object} [param] 查询参数
+ * @param {number} [param.isDelete=0] 是否删除（0=未删除）
+ * @param {boolean} [param.withGroup=true] 是否包含班组信息
+ * @param {boolean} [param.withFunction=true] 是否包含功能权限
+ * @returns {Promise<Array<Object>>}
+ */
+export const jdQueryUsers = (param = { isDelete: 0, withGroup: true, withFunction: true }) =>
+  jdApi.post('/d2_repair_api/user/page_query', {
+    pageCode: 1,
+    pageSize: 999,
+    param,
+  })
+
+/**
+ * 分页查询部门/班组列表
+ * @returns {Promise<Array<Object>>}
+ */
+export const jdQueryGroups = () =>
+  jdApi.post('/d2_repair_api/group/page_query', {
+    pageCode: 1,
+    pageSize: 1000,
   })
 
 export default jdApi

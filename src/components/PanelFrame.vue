@@ -127,35 +127,31 @@ function handleClose() {
 
 <style scoped>
 /* ========== 科技面板外层容器 ========== */
-/* 作为统一面板底座，负责圆角裁剪、背景色绑定和内容溢出控制 */
 .panel-frame {
-  /* 相对定位：作为绝对定位子元素的定位上下文 */
   position: relative;
-  /* 宽度：100% 撑满父容器 */
   width: 100%;
-  /* 高度：100% 撑满父容器 */
   height: 100%;
-  /* 圆角：12px，营造现代科技感 */
   border-radius: 12px;
-  /* 溢出隐藏：确保内容不超出圆角边界 */
   overflow: hidden;
-  /* 背景色：通过 v-bind CSS 变量动态注入，支持透明或自定义颜色 */
   background: v-bind("props.bgColor");
 }
 
 /* ========== 内层边框层 ========== */
-/* 用于承载 SVG 边框、阴影和发光效果；禁用事件避免遮挡面板内容交互 */
 .panel-frame-inner {
-  /* 绝对定位：覆盖整个面板 */
   position: absolute;
-  /* 四边对齐：inset: 0 等同于 top: 0; right: 0; bottom: 0; left: 0 */
   inset: 0;
-  /* 圆角：与外层保持一致，12px */
   border-radius: 12px;
-  /* 禁用事件：pointer-events: none 让鼠标事件穿透此层，不影响内容交互 */
   pointer-events: none;
-  /* 过渡动画：box-shadow 变化时平滑过渡，时长 0.3s */
-  transition: box-shadow 0.3s ease;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  border: 1px solid rgba(34, 211, 238, 0.08);
+  box-shadow: inset 0 0 20px rgba(2, 6, 23, 0.5);
+}
+
+.panel-frame:hover .panel-frame-inner {
+  border-color: rgba(34, 211, 238, 0.15);
+  box-shadow:
+    inset 0 0 20px rgba(2, 6, 23, 0.5),
+    0 0 15px rgba(34, 211, 238, 0.05);
 }
 
 /* ========== 默认插槽内容层 ========== */
