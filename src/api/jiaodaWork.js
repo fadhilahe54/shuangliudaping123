@@ -128,6 +128,93 @@ export async function fetchWorkByTrackName() {
 }
 
 /**
+ * 从交大机电接口拉取股道+停放车组数据，转换为后台 getAllStockRoadInfo 格式
+ *
+ * 用途：后端(:8092)停止后，完全从交大机电接口获取股道和车组数据，
+ *       驱动 trainStore 的 loadStockRoadData，实现 3D 场景渲染。
+ *
+ * 转换逻辑：
+ *   Jiaoda track  → { id, 股道名称, placeCount }
+ *   Jiaoda park   → 按 trackId + trackIndex 分组到 一列位/二列位车组信息List
+ *
+ * @returns {Promise<Array>} 兼容后台 getAllStockRoadInfo 的股道数组；失败返回 []
+ */
+export async function fetchAllStockRoadInfoFromJd() {
+  const tracks = await jdQueryTracks()
+  if (!Array.isArray(tracks) || tracks.length === 0) return []
+
+  const allIds = tracks.map(t => t.id)
+
+  // 拉取停放车组（单个接口失败不影响股道列表展示）
+  let parks = []
+  try {
+    const parkData = await jdQueryParks(allIds, 0)
+    if (Array.isArray(parkData)) parks = parkData
+  } catch (e) {
+    console.warn('[jiaodaWork] 停放车组查询失败，股道仍正常渲染', e)
+  }
+
+  // 按 trackId 分桶
+  const parksByTrack = {}
+  parks.forEach(park => {
+    const tid = park.trackId
+    if (!parksByTrack[tid]) parksByTrack[tid] = []
+    parksByTrack[tid].push(park)
+  })
+
+  // 转换为后台格式
+  return tracks.map(track => {
+    const trackParks = parksByTrack[track.id] || []
+    const slot1Parks = trackParks.filter(p => Number(p.trackIndex) === 1)
+    const slot2Parks = trackParks.filter(p => Number(p.trackIndex) === 2)
+
+    // 将 park 对象转为后台「车组信息」格式
+    const toTrainGroup = (park) => {
+      const train = park.train || {}
+      const groupNo = train.trainGroupNo || ''
+      // CR200J 系统 — 默认按动车组处理
+      const isLong = train.isLong === 1
+      const formation = isLong ? 16 : 8
+      // 生成占位车辆列表（交大机电接口无车辆明细，按编组数生成占位）
+      const vehicles = []
+      for (let i = 0; i < formation; i++) {
+        vehicles.push({
+          id: `${park.id}_v${i}`,
+          车号: `${groupNo}-${String(i + 1).padStart(2, '0')}`,
+          车辆序号: i + 1,
+          车型: 'CR200J',
+          车种: i === 0 || i === formation - 1 ? 'Mc' : (i % 2 === 1 ? 'M(' : 'T('),
+          状态: '正常',
+        })
+      }
+      return {
+        id: park.trainId || park.id,
+        车组号: groupNo,
+        车次: '',
+        车型: 'CR200J',
+        编组: formation,
+        车辆信息List: vehicles,
+      }
+    }
+
+    return {
+      id: track.id,
+      股道名称: track.name,
+      placeCount: track.placeCount,
+      股道长度: null,
+      股道偏移量: null,
+      重联状态: null,
+      一列位: null,
+      二列位: null,
+      一列位接触网: null,
+      二列位接触网: null,
+      一列位车组信息List: slot1Parks.map(toTrainGroup),
+      二列位车组信息List: slot2Parks.map(toTrainGroup),
+    }
+  })
+}
+
+/**
  * 拉取班组作业卡和登顶作业卡的汇总统计
  * @returns {Promise<{registerCards:Array, topCards:Array, registerTotal:number, topTotal:number}>}
  */

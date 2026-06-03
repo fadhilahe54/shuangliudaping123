@@ -526,33 +526,38 @@ export function createTrack(id, positionX, carriagesData, trainType, trackName, 
   }
 
   // 近端股道标号（改为与一列位相同的悬浮标牌）
-  const groundTextNear = createTextSprite(`${displayName}\n二位`, {
-    fontSize: 72,
-    fontWeight: '700',
-    color: trackColor,
-    backgroundColor: 'rgba(2,6,23,0.72)',
-    borderColor: trackBorderColor,
-    borderWidth: 2,
-    borderRadius: 14,
-    paddingX: 26,
-    paddingY: 14,
-    worldHeight: 3.8,
-    depthTest: false,
-    outlineColor: 'rgba(0,0,0,0.8)',
-    outlineWidth: 4,
-    shadowColor: trackShadowColor,
-    shadowBlur: 12,
-  })
-  groundTextNear.renderOrder = 90 // 确保在普通物体上方，但在状态标牌下方
-  groundTextNear.position.set(0, 5.0, layout.nearLabelZ-2)
-  trackGroup.add(groundTextNear)
-
-  // 二位列位供电状态标牌
+  // placeCount=1 的股道仅有一位，不显示二位标牌
+  const _placeCount = (cfg && cfg.placeCount != null) ? cfg.placeCount : 2
+  let groundTextNear = null
   let slot2PowerLabel = null
-  if (_slot2Power != null) {
-    slot2PowerLabel = createPowerStateLabel(_slot2Power, { worldHeight: 2.8 })
-    slot2PowerLabel.sprite.position.set(0, 8.6, layout.nearLabelZ + 6)
-    trackGroup.add(slot2PowerLabel.sprite)
+  if (_placeCount >= 2) {
+    groundTextNear = createTextSprite(`${displayName}\n二位`, {
+      fontSize: 72,
+      fontWeight: '700',
+      color: trackColor,
+      backgroundColor: 'rgba(2,6,23,0.72)',
+      borderColor: trackBorderColor,
+      borderWidth: 2,
+      borderRadius: 14,
+      paddingX: 26,
+      paddingY: 14,
+      worldHeight: 3.8,
+      depthTest: false,
+      outlineColor: 'rgba(0,0,0,0.8)',
+      outlineWidth: 4,
+      shadowColor: trackShadowColor,
+      shadowBlur: 12,
+    })
+    groundTextNear.renderOrder = 90
+    groundTextNear.position.set(0, 5.0, layout.nearLabelZ-2)
+    trackGroup.add(groundTextNear)
+
+    // 二位列位供电状态标牌
+    if (_slot2Power != null) {
+      slot2PowerLabel = createPowerStateLabel(_slot2Power, { worldHeight: 2.8 })
+      slot2PowerLabel.sprite.position.set(0, 8.6, layout.nearLabelZ + 6)
+      trackGroup.add(slot2PowerLabel.sprite)
+    }
   }
 
   // ====== 作业状态标记（作业班组 / 登顶作业，可点击弹出作业看板）======
@@ -939,34 +944,38 @@ export function createSidingTrack(nId, displayIndex, positionX, carriagesData, t
     trackGroup.add(slot1PowerLabel.sprite)
   }
 
-  // 近端股道标号（改为与一列位相同的悬浮标牌）
-  const groundTextNear = createTextSprite(`${displayName}\n二位`, {
-    fontSize: 64,
-    fontWeight: '700',
-    color: '#f59e0b',
-    backgroundColor: 'rgba(2,6,23,0.72)',
-    borderColor: 'rgba(245,158,11,0.55)',
-    borderWidth: 2,
-    borderRadius: 12,
-    paddingX: 22,
-    paddingY: 10,
-    worldHeight: 3.2,
-    depthTest: false,
-    outlineColor: 'rgba(0,0,0,0.8)',
-    outlineWidth: 3,
-    shadowColor: 'rgba(245,158,11,0.45)',
-    shadowBlur: 10,
-  })
-  groundTextNear.renderOrder = 90 // 确保在普通物体上方，但在状态标牌下方
-  groundTextNear.position.set(0, 5.0, layout.nearLabelZ-2)
-  trackGroup.add(groundTextNear)
-
-  // 二位列位供电状态标牌
+  // 近端股道标号 — placeCount=1 的股道仅有一位，不显示二位标牌
+  const _placeCount = (cfg && cfg.placeCount != null) ? cfg.placeCount : 2
+  let groundTextNear = null
   let slot2PowerLabel = null
-  if (_slot2Power != null) {
-    slot2PowerLabel = createPowerStateLabel(_slot2Power, { worldHeight: 2.6 })
-    slot2PowerLabel.sprite.position.set(0, 8.4, layout.nearLabelZ + 6)
-    trackGroup.add(slot2PowerLabel.sprite)
+  if (_placeCount >= 2) {
+    groundTextNear = createTextSprite(`${displayName}\n二位`, {
+      fontSize: 64,
+      fontWeight: '700',
+      color: '#f59e0b',
+      backgroundColor: 'rgba(2,6,23,0.72)',
+      borderColor: 'rgba(245,158,11,0.55)',
+      borderWidth: 2,
+      borderRadius: 12,
+      paddingX: 22,
+      paddingY: 10,
+      worldHeight: 3.2,
+      depthTest: false,
+      outlineColor: 'rgba(0,0,0,0.8)',
+      outlineWidth: 3,
+      shadowColor: 'rgba(245,158,11,0.45)',
+      shadowBlur: 10,
+    })
+    groundTextNear.renderOrder = 90
+    groundTextNear.position.set(0, 5.0, layout.nearLabelZ-2)
+    trackGroup.add(groundTextNear)
+
+    // 二位列位供电状态标牌
+    if (_slot2Power != null) {
+      slot2PowerLabel = createPowerStateLabel(_slot2Power, { worldHeight: 2.6 })
+      slot2PowerLabel.sprite.position.set(0, 8.4, layout.nearLabelZ + 6)
+      trackGroup.add(slot2PowerLabel.sprite)
+    }
   }
 
   // ====== 作业状态标记（作业班组 / 登顶作业，可点击弹出作业看板）======
